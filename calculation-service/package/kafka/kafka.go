@@ -11,7 +11,8 @@ import (
 
 type Kafka interface {
 	Connect() error
-	Consume(topics []string, signals chan os.Signal)
+	Consume(topic string, signals chan os.Signal) (sarama.Consumer, []int32, error)
+	Consumer() sarama.Consumer
 }
 
 type Options struct {
@@ -26,6 +27,8 @@ type Options struct {
 func NewKafka(cfg *config.Config) Kafka {
 	opt := new(Options)
 	opt.kafkaAddr = cfg.KafkaAddress
+	opt.writeTimeOut = cfg.WriteTimeout
+	opt.maxRetry = int(cfg.MaxRetry)
 
 	return opt
 }
@@ -47,44 +50,44 @@ func (o *Options) Connect() error {
 		log.Error().Err(err).Msgf("Error create kakfa consumer got error %v", err)
 		return err
 	}
-	defer func() {
-		if err := consumers.Close(); err != nil {
-			log.Fatal().Msg(err.Error())
-			return
-		}
-	}()
 
 	o.consumer = consumers
 	return nil
 }
 
-func (o *Options) Consume(topics []string, signals chan os.Signal) {
-	chanMessage := make(chan *sarama.ConsumerMessage, 256)
-
-	for _, topic := range topics {
-		partitionList, err := o.consumer.Partitions(topic)
-		if err != nil {
-			log.Error().Err(err).Msgf("Unable to get partition got error %v", err)
-			continue
-		}
-		for _, partition := range partitionList {
-			go consumeMessage(o.consumer, topic, partition, chanMessage)
-		}
-	}
-	log.Info().Msgf("Kafka is consuming....")
-
-ConsumerLoop:
-	for {
-		select {
-		case msg := <-chanMessage:
-			log.Info().Msgf("New Message from kafka, message: %v", string(msg.Value))
-		case sig := <-signals:
-			if sig == os.Interrupt {
-				break ConsumerLoop
-			}
-		}
-	}
+func (o *Options) Consumer() sarama.Consumer {
+	return o.consumer
 }
+
+func (o *Options) Consume(topic string, signals chan os.Signal) (sarama.Consumer, []int32, error) {
+	// chanMessage := make(chan *sarama.ConsumerMessage, 256)
+	partitionList, err := o.consumer.Partitions(topic)
+	if err != nil {
+		log.Error().Err(err).Msgf("Unable to get partition got error %v", err)
+		return nil, nil, err
+	}
+
+	// for _, topic := range topics {
+	// 	for _, partition := range partitionList {
+	// 		go consumeMessage(o.consumer, topic, partition, chanMessage)
+	// 	}
+	// }
+	log.Info().Msgf("Kafka is consuming....")
+	return o.consumer, partitionList, nil
+}
+
+// ConsumerLoop:
+// 	for {
+// 		select {
+// 		case msg := <-chanMessage:
+// 			log.Info().Msgf("New Message from kafka, message: %v", string(msg.Value))
+// 		case sig := <-signals:
+// 			if sig == os.Interrupt {
+// 				break ConsumerLoop
+// 			}
+// 		}
+// 	}
+// }
 
 func consumeMessage(consumer sarama.Consumer, topic string, partition int32, c chan *sarama.ConsumerMessage) {
 	msg, err := consumer.ConsumePartition(topic, partition, sarama.OffsetNewest)

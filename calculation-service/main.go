@@ -14,7 +14,8 @@ func run() error {
 		return err
 	}
 
-	_, err = ohlcService.NewOHLC(mgr)
+	signals := make(chan os.Signal, 1)
+	err = ohlcService.NewOHLC(mgr, signals)
 	if err != nil {
 		return err
 	}

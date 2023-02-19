@@ -12,9 +12,11 @@ type Config struct {
 	AppEnv       string `mapstructure:"APP_ENV"`
 	AppIsDev     bool
 	KafkaAddress string `mapstructure:"KAFKA_ADDRESS"`
-	MaxRetry     int    `mapstructure:"MAX_RETRY"`
+	MaxRetry     int64  `mapstructure:"MAX_RETRY"`
+	WriteTimeout int64  `mapstructure:"WRITE_TIMEOUT"`
 	Username     string `mapstructure:"USERNAME"`
 	Password     string `mapstructure:"PASSWORD"`
+	OhlcTopic    string `mapstructure:"OHLC_TOPIC"`
 }
 
 func NewConfig() (*Config, error) {
