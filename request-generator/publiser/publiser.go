@@ -10,7 +10,7 @@ type KafkaProducer struct {
 }
 
 // SendMessage function to send message into kafka
-func (p *KafkaProducer) SendMessage(topic, msg string) error {
+func (p *KafkaProducer) SendMessage(topic string, msg []byte) error {
 
 	kafkaMsg := &sarama.ProducerMessage{
 		Topic: topic,
