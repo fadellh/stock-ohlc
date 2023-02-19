@@ -9,14 +9,19 @@ import (
 type ContextKey string
 
 type Config struct {
-	AppEnv       string `mapstructure:"APP_ENV"`
-	AppIsDev     bool
-	KafkaAddress string `mapstructure:"KAFKA_ADDRESS"`
-	MaxRetry     int64  `mapstructure:"MAX_RETRY"`
-	WriteTimeout int64  `mapstructure:"WRITE_TIMEOUT"`
-	Username     string `mapstructure:"USERNAME"`
-	Password     string `mapstructure:"PASSWORD"`
-	OhlcTopic    string `mapstructure:"OHLC_TOPIC"`
+	AppEnv          string `mapstructure:"APP_ENV"`
+	AppIsDev        bool
+	KafkaAddress    string `mapstructure:"KAFKA_ADDRESS"`
+	MaxRetry        int64  `mapstructure:"MAX_RETRY"`
+	WriteTimeout    int64  `mapstructure:"WRITE_TIMEOUT"`
+	Username        string `mapstructure:"USERNAME"`
+	Password        string `mapstructure:"PASSWORD"`
+	OhlcTopic       string `mapstructure:"OHLC_TOPIC"`
+	RedisConnection string `mapstructure:"REDIS_CONNECTION"`
+	RedisAddress    string `mapstructure:"REDIS_ADDRESS"`
+	RedisUsername   string `mapstructure:"REDIS_USERNAME"`
+	RedisPassword   string `mapstructure:"REDIS_PASSWORD"`
+	RedisDatabase   int    `mapstructure:"REDIS_DATABASE"`
 }
 
 func NewConfig() (*Config, error) {
