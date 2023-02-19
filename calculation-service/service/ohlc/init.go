@@ -10,10 +10,7 @@ import (
 )
 
 func NewOHLC(mgr manager.Manager, signals chan os.Signal) error {
-	ohlc, err := ohlcUsecase.NewOhlcUsecase(mgr)
-	if err != nil {
-		return err
-	}
+	ohlc := ohlcUsecase.NewOhlcUsecase(mgr)
 
 	cfg := mgr.GetConfig()
 	consumer := mgr.GetKafka().Consumer()

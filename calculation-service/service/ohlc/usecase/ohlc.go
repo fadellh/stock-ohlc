@@ -20,29 +20,32 @@ type Options struct {
 	OhlcTopic string
 }
 
-func NewOhlcUsecase(mgr manager.Manager) (OhlcUsecase, error) {
+func NewOhlcUsecase(mgr manager.Manager) OhlcUsecase {
 	opt := new(Options)
 	opt.config = mgr.GetConfig()
-	opt.consumer = mgr.GetKafka().Consumer()
 	opt.OhlcTopic = opt.config.OhlcTopic
 
-	return opt, nil
+	return opt
 }
 
 func (o *Options) CalculateOHLC(msg *sarama.ConsumerMessage) {
+	log.Info().Msgf("New Message from kafka, message: %v", string(msg.Key))
 	var req ohlcEntity.OhlcMessage
 	if err := json.Unmarshal(msg.Value, &req); err != nil {
 		log.Error().Err(err).Msgf("[Usecase-1] %v", err)
 		return
 	}
 
-	result := ohlcEntity.OhlcStock{}
+	ohlcCalculation(req)
 
+	return
+}
+
+func ohlcCalculation(req ohlcEntity.OhlcMessage) ohlcEntity.OhlcStock {
+	result := ohlcEntity.OhlcStock{}
 	result.StockCode = req.StockCode
 	if req.Quantity == 0 && req.Type == ohlcEntity.A {
 		result.OpenPrice = req.Price
 	}
-
-	log.Info().Msgf("New Message from kafka, message: %v", string(msg.Value))
-	return
+	return result
 }
