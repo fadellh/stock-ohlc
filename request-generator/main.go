@@ -95,7 +95,7 @@ func decodeJsonPubliser(filename string, kafka *publiser.KafkaProducer) error {
 		}
 
 		payload, _ := json.Marshal(v)
-		kafka.SendMessage("stock-ohlc", string(payload))
+		kafka.SendMessage("stock-ohlc", payload)
 	}
 
 	return nil

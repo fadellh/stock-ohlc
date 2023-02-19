@@ -22,6 +22,7 @@ type Config struct {
 	RedisUsername   string `mapstructure:"REDIS_USERNAME"`
 	RedisPassword   string `mapstructure:"REDIS_PASSWORD"`
 	RedisDatabase   int    `mapstructure:"REDIS_DATABASE"`
+	RedisExpired    int    `mapstructure:"REDIS_EXPIRED"`
 }
 
 func NewConfig() (*Config, error) {
