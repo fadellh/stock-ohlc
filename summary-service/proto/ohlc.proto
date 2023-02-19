@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option go_package = "github.com/fadellh/stock-ohlc/summary-service/proto";
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.routeguide";
+option java_outer_classname = "RouteGuideProto";
+
+package proto;
+
+service Ohlc {
+  rpc GetOhlcSummary(SummaryRequest) returns (SummaryResponse) {}
+
+}
+
+
+message SummaryRequest{
+    string stockcode = 1;
+}
+
+message SummaryResponse {
+    int32 prev  = 1;
+    int32 open  = 2;
+    int32 highest  = 3;
+    int32 lowest  = 4;
+    int32 close  = 5;
+    int32 average  = 6;
+    int32 volume  = 7;
+    int32 value  = 8;
+}

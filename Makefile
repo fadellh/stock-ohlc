@@ -4,6 +4,9 @@ run-rg:
 run-cs:
 	@go run calculation-service/main.go
 
+run-ss:
+	@go run summary-service/main.go
+
 test:
 	@go test ./...
 
@@ -21,3 +24,8 @@ generate-mock-cs:
 	@echo "- ohlc"
 	@mockgen -destination=calculation-service/service/ohlc/usecase/ohlc_mock.go -package=ohlcUsecase -source=calculation-service/service/ohlc/usecase/ohlc.go
 	@mockgen -destination=calculation-service/service/ohlc/repository/ohlc_mock.go -package=ohlcRepository -source=calculation-service/service/ohlc/repository/ohlc.go
+
+proto-ss:
+	protoc --go_out=. --go_opt=paths=source_relative \
+    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+    summary-service/proto/ohlc.proto
