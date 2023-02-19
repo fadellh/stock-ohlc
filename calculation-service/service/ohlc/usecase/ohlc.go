@@ -2,6 +2,7 @@ package ohlcUsecase
 
 import (
 	"encoding/json"
+	"math"
 
 	"github.com/Shopify/sarama"
 	"github.com/fadellh/stock-ohlc/calculation-service/package/config"
@@ -32,16 +33,24 @@ func NewOhlcUsecase(mgr manager.Manager) OhlcUsecase {
 }
 
 func (o *Options) CalculateOHLC(msg *sarama.ConsumerMessage) {
-	log.Info().Msgf("New Message from kafka, message: %v", string(msg.Key))
 	var req ohlcEntity.OhlcMessage
 	if err := json.Unmarshal(msg.Value, &req); err != nil {
 		log.Error().Err(err).Msgf("[CalculateOHLC-Usecase-1] %v", err)
 		return
 	}
+	log.Info().Msgf("New Message from kafka, stock code: %v, price %d", req.StockCode, req.Price)
+
+	if req.Price == 0 && req.ExecutionPrice > 0 {
+		req.Price = req.ExecutionPrice
+	}
+
+	if req.Quantity == 0 && req.ExecutedQuantity > 0 {
+		req.Quantity = req.ExecutedQuantity
+	}
 
 	result := ohlcEntity.OhlcStock{}
 	result.StockCode = req.StockCode
-	if req.Quantity == 0 && req.Type == ohlcEntity.A {
+	if req.Quantity == 0 {
 		result.PreviousPrice = req.Price
 	}
 
@@ -60,10 +69,47 @@ func (o *Options) CalculateOHLC(msg *sarama.ConsumerMessage) {
 		return
 	}
 
-	result = ohlcTrxCalculation(*ohlcData)
+	result = ohlcTrxCalculation(req, *ohlcData)
+	if result.StockCode == "" {
+		return
+	}
+
+	err = o.repo.StoreRedis(result)
+	if err != nil {
+		log.Error().Err(err).Msgf("[CalculateOHLC-Usecase-4] %v", err)
+		return
+	}
+
 	return
 }
 
-func ohlcTrxCalculation(data ohlcEntity.OhlcStock) ohlcEntity.OhlcStock {
-	return data
+func ohlcTrxCalculation(req ohlcEntity.OhlcMessage, currentOhlc ohlcEntity.OhlcStock) ohlcEntity.OhlcStock {
+	if req.StockCode != currentOhlc.StockCode {
+		log.Error().Msgf("Stock code different")
+		return ohlcEntity.OhlcStock{}
+	}
+
+	if currentOhlc.Volume == 0 {
+		currentOhlc.OpenPrice = req.Price
+		currentOhlc.LowestPrice = req.Price
+	}
+
+	if req.Price >= currentOhlc.HighestPrice {
+		currentOhlc.HighestPrice = req.Price
+	}
+
+	if req.Price <= currentOhlc.LowestPrice {
+		currentOhlc.LowestPrice = req.Price
+	}
+
+	currentOhlc.ClosePrice = req.Price
+	currentOhlc.Volume += req.Quantity
+	currentOhlc.Value += (req.Quantity * req.Price)
+
+	volume := float64(currentOhlc.Volume)
+	value := float64(currentOhlc.Value)
+	averagePrice := value / volume
+
+	currentOhlc.AveragePrice = int(math.Round(averagePrice))
+	return currentOhlc
 }

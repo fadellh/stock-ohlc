@@ -17,3 +17,7 @@ generate-mock-cs:
 	@echo "[Package]"
 	@echo "- Kafka"
 	@mockgen -destination=calculation-service/package/kafka/kafka_mock.go -package=kafkaPackage -source=calculation-service/package/kafka/kafka.go
+	@echo "[Service]"
+	@echo "- ohlc"
+	@mockgen -destination=calculation-service/service/ohlc/usecase/ohlc_mock.go -package=ohlcUsecase -source=calculation-service/service/ohlc/usecase/ohlc.go
+	@mockgen -destination=calculation-service/service/ohlc/repository/ohlc_mock.go -package=ohlcRepository -source=calculation-service/service/ohlc/repository/ohlc.go
