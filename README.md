@@ -11,7 +11,7 @@
 ## Getting started
 
 - local
-  - run request-genrator
+  - run request-generator
     ```
     $ make run-rg
     ```
@@ -62,7 +62,7 @@ A robust and versatile structure, perfect for large projects and capable of acco
     - [x] `handler.go`: Present your data. [**TechDebt**]
     - [x] `[feature].go` : Billion dollar business process
 
-### Summary Service
+### Request Generator
 Just a simple service that is used for simulating adding data to a message broker.
 
 
