@@ -63,6 +63,7 @@ func (h *Handler) GetOhlcSummary(ctx context.Context, in *pb.SummaryRequest) (*p
 		)
 	}
 
+	log.Info().Msgf("Stock code: %v | Close Price: %d", data.StockCode, data.ClosePrice)
 	return &pb.SummaryResponse{
 		Prev:    int32(data.PreviousPrice),
 		Open:    int32(data.OpenPrice),
