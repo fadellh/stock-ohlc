@@ -7,7 +7,6 @@ import (
 
 type Handler struct {
 	pb.UnimplementedOhlcServer
-	Message     string
 	redisClient *redis.Client
 }
 
