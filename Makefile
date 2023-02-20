@@ -5,7 +5,7 @@ run-cs:
 	@go run calculation-service/main.go
 
 run-ss:
-	@go run summary-service/main.go
+	@go run summary-service/main.go 
 
 test:
 	@go test ./...
