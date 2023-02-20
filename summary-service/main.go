@@ -10,7 +10,6 @@ import (
 	pb "github.com/fadellh/stock-ohlc/summary-service/proto"
 	redisPackage "github.com/fadellh/stock-ohlc/summary-service/redis"
 	handleOhlc "github.com/fadellh/stock-ohlc/summary-service/service/ohlc"
-	"github.com/go-redis/redis/v8"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 )
@@ -18,11 +17,6 @@ import (
 var (
 	port = flag.Int("port", 50051, "The server port")
 )
-
-type Server struct {
-	UnimplementedOhlcServer pb.UnimplementedOhlcServer
-	redisClient             redis.Client
-}
 
 func run() error {
 	flag.Parse()
