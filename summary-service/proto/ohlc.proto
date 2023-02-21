@@ -24,6 +24,7 @@ message SummaryResponse {
     int32 lowest  = 4;
     int32 close  = 5;
     int32 average  = 6;
-    int32 volume  = 7;
-    int32 value  = 8;
+    int64 volume  = 7;
+    int64 value  = 8;
+    string code = 9;
 }

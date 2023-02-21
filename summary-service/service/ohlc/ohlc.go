@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strconv"
 
 	pb "github.com/fadellh/stock-ohlc/summary-service/proto"
 
@@ -28,8 +29,8 @@ type OhlcStock struct {
 	HighestPrice  int       `json:"highest"`
 	LowestPrice   int       `json:"lowest"`
 	ClosePrice    int       `json:"close"`
-	Volume        int       `json:"volume"`
-	Value         int       `json:"value"`
+	Volume        int64     `json:"volume"`
+	Value         string    `json:"value"`
 	AveragePrice  int       `json:"average"`
 	Type          OrderType `json:"type"`
 }
@@ -63,15 +64,29 @@ func (h *Handler) GetOhlcSummary(ctx context.Context, in *pb.SummaryRequest) (*p
 		)
 	}
 
-	log.Info().Msgf("Stock code: %v | Close Price: %d", data.StockCode, data.ClosePrice)
+	if data.Value == "" {
+		data.Value = "0"
+	}
+
+	currentValue, err := strconv.ParseInt(data.Value, 10, 64)
+	if err != nil {
+		log.Error().Msgf("int err: %v", err.Error())
+		return nil, status.Errorf(
+			codes.Internal,
+			err.Error(),
+		)
+	}
+
+	log.Info().Msgf("Stock code: %v | Close Price: %d | value %s", data.StockCode, data.ClosePrice, data.Value)
 	return &pb.SummaryResponse{
+		Code:    data.StockCode,
 		Prev:    int32(data.PreviousPrice),
 		Open:    int32(data.OpenPrice),
 		Highest: int32(data.HighestPrice),
 		Lowest:  int32(data.LowestPrice),
 		Close:   int32(data.ClosePrice),
 		Average: int32(data.AveragePrice),
-		Volume:  int32(data.Volume),
-		Value:   int32(data.Value),
+		Volume:  data.Volume,
+		Value:   currentValue,
 	}, nil
 }

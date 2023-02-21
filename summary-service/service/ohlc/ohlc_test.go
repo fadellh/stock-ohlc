@@ -23,6 +23,7 @@ func TestHandler_GetOhlcSummary(t *testing.T) {
 	data := &OhlcStock{
 		StockCode:     "TLKM",
 		PreviousPrice: 1000,
+		Value:         "0",
 	}
 
 	src, _ := json.Marshal(data)
@@ -66,6 +67,7 @@ func TestHandler_GetOhlcSummary(t *testing.T) {
 				Average: 0,
 				Volume:  0,
 				Value:   0,
+				Code:    "TLKM",
 			},
 			wantErr: false,
 		},

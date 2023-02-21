@@ -3,6 +3,7 @@ package ohlcUsecase
 import (
 	"encoding/json"
 	"math"
+	"strconv"
 
 	"github.com/Shopify/sarama"
 	"github.com/fadellh/stock-ohlc/calculation-service/package/config"
@@ -50,6 +51,7 @@ func (o *Options) CalculateOHLC(msg *sarama.ConsumerMessage) {
 
 	result := ohlcEntity.OhlcStock{}
 	result.StockCode = req.StockCode
+	result.Value = "0"
 	if req.Quantity == 0 {
 		result.PreviousPrice = req.Price
 	}
@@ -103,11 +105,24 @@ func ohlcTrxCalculation(req ohlcEntity.OhlcMessage, currentOhlc ohlcEntity.OhlcS
 	}
 
 	currentOhlc.ClosePrice = req.Price
-	currentOhlc.Volume += req.Quantity
-	currentOhlc.Value += (req.Quantity * req.Price)
+	currentOhlc.Volume += int64(req.Quantity)
+
+	if currentOhlc.Value == "" {
+		currentOhlc.Value = "0"
+	}
+
+	currentValue, err := strconv.ParseInt(currentOhlc.Value, 10, 64)
+	if err != nil {
+		log.Error().Msgf("int err: %v", err.Error())
+		return ohlcEntity.OhlcStock{}
+	}
+
+	currentValue += int64((req.Quantity * req.Price))
+	strValue := strconv.FormatInt(currentValue, 10)
+	currentOhlc.Value = strValue
 
 	volume := float64(currentOhlc.Volume)
-	value := float64(currentOhlc.Value)
+	value := float64(currentValue)
 	averagePrice := value / volume
 
 	currentOhlc.AveragePrice = int(math.Round(averagePrice))

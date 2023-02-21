@@ -25,8 +25,8 @@ type OhlcStock struct {
 	HighestPrice  int       `json:"highest"`
 	LowestPrice   int       `json:"lowest"`
 	ClosePrice    int       `json:"close"`
-	Volume        int       `json:"volume"`
-	Value         int       `json:"value"`
+	Volume        int64     `json:"volume"`
+	Value         string    `json:"value"`
 	AveragePrice  int       `json:"average"`
 	Type          OrderType `json:"type"`
 }

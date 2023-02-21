@@ -3,6 +3,7 @@ package ohlcUsecase
 import (
 	"errors"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/Shopify/sarama"
@@ -56,7 +57,7 @@ func Test_ohlcTrxCalculation(t *testing.T) {
 		LowestPrice:   0,
 		ClosePrice:    1000,
 		Volume:        0,
-		Value:         0,
+		Value:         "0",
 		Type:          "P",
 	}
 
@@ -68,10 +69,14 @@ func Test_ohlcTrxCalculation(t *testing.T) {
 		LowestPrice:   7950,
 		ClosePrice:    8100,
 		Volume:        900,
-		Value:         7210000,
+		Value:         "7210000",
 		Type:          "P",
 		AveragePrice:  8011,
 	}
+
+	currentValue := 7210000
+	var amount_of_two_value int64 = int64(currentValue + (4333 * 225))
+	strValue := strconv.FormatInt(amount_of_two_value, 10)
 
 	type args struct {
 		req         ohlcEntity.OhlcMessage
@@ -100,7 +105,7 @@ func Test_ohlcTrxCalculation(t *testing.T) {
 					LowestPrice:   0,
 					ClosePrice:    0,
 					Volume:        0,
-					Value:         0,
+					Value:         "0",
 					AveragePrice:  0,
 					Type:          "",
 				},
@@ -127,7 +132,7 @@ func Test_ohlcTrxCalculation(t *testing.T) {
 				LowestPrice:   1000,
 				ClosePrice:    1000,
 				Volume:        5,
-				Value:         5 * 1000,
+				Value:         "5000",
 				AveragePrice:  1000,
 				Type:          "P",
 			},
@@ -152,7 +157,7 @@ func Test_ohlcTrxCalculation(t *testing.T) {
 				LowestPrice:   4333,
 				ClosePrice:    4333,
 				Volume:        1125,
-				Value:         currentDataMass.Value + (4333 * 225),
+				Value:         strValue,
 				AveragePrice:  7275,
 				Type:          "P",
 			},
@@ -185,7 +190,7 @@ func TestOptions_CalculateOHLC(t *testing.T) {
 		LowestPrice:   0,
 		ClosePrice:    0,
 		Volume:        0,
-		Value:         0,
+		Value:         "0",
 		AveragePrice:  0,
 	}
 
@@ -202,7 +207,7 @@ func TestOptions_CalculateOHLC(t *testing.T) {
 		LowestPrice:   0,
 		ClosePrice:    0,
 		Volume:        0,
-		Value:         0,
+		Value:         "0",
 		AveragePrice:  0,
 		Type:          "",
 	}
@@ -220,7 +225,7 @@ func TestOptions_CalculateOHLC(t *testing.T) {
 		LowestPrice:   2000,
 		ClosePrice:    2000,
 		Volume:        100,
-		Value:         500000,
+		Value:         "500000",
 		AveragePrice:  5000,
 		Type:          "P",
 	}
