@@ -60,8 +60,10 @@ func run() error {
 		filenames = append(filenames, file.Name())
 	}
 
-	for _, filename := range filenames {
-		decodeJsonPubliser(dirName+filename, kafka)
+	for i, filename := range filenames {
+		if i == 0 {
+			decodeJsonPubliser(dirName+filename, kafka)
+		}
 	}
 
 	return nil

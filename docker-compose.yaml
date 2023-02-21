@@ -3,6 +3,9 @@ version: '3.7'
 networks:
   kafka:
     name: kafka
+volumes:
+  cache:
+    driver: local
 services: 
   
   zookeeper:
@@ -30,10 +33,21 @@ services:
       interval: 10s
       timeout: 20s
       retries: 5
-  
-
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis-ohlc
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --loglevel warning
+    volumes: 
+      - cache:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
   calculation-service:
-
       container_name: calculation-app
       build:
         context: .
@@ -45,5 +59,30 @@ services:
       depends_on:
         kafka:
           condition: service_healthy
+      # environment:
+      #   - REDIS_CONNECTION=redis://redis:6379
+  summary-service:
+      container_name: summary-app
+      build:
+        context: .
+        dockerfile: Dockerfile.summary
+      env_file:
+        - "summary-service/config/local.env"
+      environment:
+        - REDIS_CONNECTION=redis://redis:6379
+      depends_on:
+        - redis
+      ports:
+        - 50051:50051
+  request-generator:
+      container_name: request-generator
+      build:
+        context: .
+        dockerfile: Dockerfile.req-gen
+      depends_on:
+        - calculation-service
+      networks:
+        - kafka
+
 
 
