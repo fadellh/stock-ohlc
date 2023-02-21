@@ -1,0 +1,16 @@
+FROM golang:1.20-alpine
+
+WORKDIR /app
+
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
+
+COPY . ./
+COPY ./summary-service ./
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping
+
+EXPOSE 50051
+
+CMD [ "/docker-gs-ping" ]
