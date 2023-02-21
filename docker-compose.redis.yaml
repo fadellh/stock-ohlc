@@ -1,0 +1,18 @@
+version: '3.7'
+
+volumes:
+  cache:
+    driver: local
+services: 
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis-ohlc
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --loglevel warning
+    volumes: 
+      - cache:/data
+
+
+
