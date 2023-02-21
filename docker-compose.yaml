@@ -3,29 +3,41 @@ version: '3.7'
 networks:
   kafka:
     name: kafka
+  redis-networks:
+    driver: bridge
 volumes:
   cache:
     driver: local
 services: 
   
   zookeeper:
-    image: confluentinc/cp-zookeeper:4.1.0
+    image: confluentinc/cp-zookeeper:7.3.1
     container_name: zookeeper-ohlc
     networks: 
       - kafka
     environment: 
       ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
   kafka:
-    image: confluentinc/cp-kafka:4.1.0
+    image: confluentinc/cp-server:7.3.1
     container_name: kafka-ohlc
     networks: 
       - kafka
     depends_on:
       - zookeeper
     environment: 
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
     ports: 
       - 9092:9092
     healthcheck:
@@ -33,20 +45,14 @@ services:
       interval: 10s
       timeout: 20s
       retries: 5
-  redis:
-    image: redis:6.2-alpine
-    container_name: redis-ohlc
-    restart: always
+  app-redis:
+    image: redislabs/redismod:latest
+    container_name: app-redis
     ports:
-      - '6379:6379'
-    command: redis-server --loglevel warning
-    volumes: 
-      - cache:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 30
+      - "6379:6379"
+    networks:
+      - redis-networks
+    restart: always
   calculation-service:
       container_name: calculation-app
       build:
@@ -54,13 +60,16 @@ services:
         dockerfile: Dockerfile.calculation
       networks:
         - kafka
+        - redis-networks
+      # links:
+      #   - redis
       env_file:
         - "calculation-service/package/config/local.env"
+      environment:
+        - REDIS_CONNECTION=redis://app-redis:6379
       depends_on:
         kafka:
           condition: service_healthy
-      # environment:
-      #   - REDIS_CONNECTION=redis://redis:6379
   summary-service:
       container_name: summary-app
       build:
@@ -69,9 +78,11 @@ services:
       env_file:
         - "summary-service/config/local.env"
       environment:
-        - REDIS_CONNECTION=redis://redis:6379
+        - REDIS_CONNECTION=redis://app-redis:6379
       depends_on:
-        - redis
+        - app-redis
+      networks:
+        - redis-networks
       ports:
         - 50051:50051
   request-generator:

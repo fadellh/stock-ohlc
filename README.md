@@ -23,7 +23,7 @@
     ```
     $ make run-ss
     ```
-  - run all app [**TECH DEBT**]
+  - run all app
     ```
     $ make run-all-app
     ```
@@ -108,5 +108,5 @@ Just a simple service that is used for simulating adding data to a message broke
     - current rpc
       - `/GetOhlcSummary`
 ## Tech Debt watchlist
-- [ ] fixing docker-compose
-- [ ] fixing makefile run-all-app
+- [x] fixing docker-compose
+- [x] fixing makefile run-all-app

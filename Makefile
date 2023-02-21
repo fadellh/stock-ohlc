@@ -31,6 +31,9 @@ proto-ss:
     summary-service/proto/ohlc.proto
 
 run-all-app:
+	@docker compose up
+
+run-all-service:
 	@docker-compose -f docker-compose.kafka.yaml up 
 	@sleep 30 &
 	@docker-compose -f docker-compose.redis.yaml up 
