@@ -29,3 +29,18 @@ proto-ss:
 	protoc --go_out=. --go_opt=paths=source_relative \
     --go-grpc_out=. --go-grpc_opt=paths=source_relative \
     summary-service/proto/ohlc.proto
+
+run-all-app:
+	@docker-compose -f docker-compose.kafka.yaml up 
+	@sleep 30 &
+	@docker-compose -f docker-compose.redis.yaml up 
+	@sleep 10 &
+	@make run-ss
+	@make run-cs
+	@make run-rg
+
+run-kafka:
+	@docker-compose -f docker-compose.kafka.yaml up 
+
+run-redis:
+	@docker-compose -f docker-compose.redis.yaml up 

@@ -23,6 +23,10 @@
     ```
     $ make run-ss
     ```
+  - run all app [**TECH DEBT**]
+    ```
+    $ make run-all-app
+    ```
 - unit testing
   ```
   $ make test
@@ -32,7 +36,22 @@
   ```
   $ make proto
   ```
-
+- step by step run manualy
+  - run kafka first
+  ```
+  $ make run-kafka
+  ```
+  - wait until kafka ready
+  - run redis
+  ```
+  $ make run-redis
+  ```
+  - run app
+  ```
+   $ make run-cs
+   $ make run-ss
+   $ make run-rg
+  ```
 ## Project Structure
   
 ### Calculation Service
@@ -59,10 +78,35 @@ A robust and versatile structure, perfect for large projects and capable of acco
 - [x] `redis/`: You can connect to redis
 - [x] `service/`: Place to manage all feature
   - [x] `[feature]`: What domain expert needs 
-    - [x] `handler.go`: Present your data. [**TechDebt**]
+    - [x] `handler.go`: Present your data.
     - [x] `[feature].go` : Billion dollar business process
 
 ### Request Generator
 Just a simple service that is used for simulating adding data to a message broker.
 
 
+## Running and Test
+### Manual test
+  - step by step run manualy
+    - run kafka first
+    ```
+    $ make run-kafka
+    ```
+    - wait until kafka ready
+    - run redis
+    ```
+    $ make run-redis
+    ```
+    - run app
+    ```
+     $ make run-cs
+     $ make run-ss
+     $ make run-rg
+    ```
+  - You might use postman and upload `summary-service/proto/ohlc.proto` file to postman
+    - set network to `localhost:50051`
+    - current rpc
+      - `/GetOhlcSummary`
+## Tech Debt watchlist
+- [ ] fixing docker-compose
+- [ ] fixing makefile run-all-app
